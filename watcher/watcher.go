@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"context"
+	"errors"
 
 	"github.com/taigrr/clipassist/matchers"
 	"golang.design/x/clipboard"
@@ -12,8 +13,10 @@ var (
 	current  int
 )
 
+const clipRingSize = 50
+
 func init() {
-	clipRing = make([]string, 50)
+	clipRing = make([]string, clipRingSize)
 }
 
 func Watch(ctx context.Context) {
@@ -34,4 +37,17 @@ func Watch(ctx context.Context) {
 			return
 		}
 	}
+}
+
+func WriteToClip(text string) error {
+	success := clipboard.Write(clipboard.FmtText, []byte(text))
+	if success == nil {
+		return errors.New("could not write to clipboard")
+	}
+	return nil
+}
+
+func GetClipAtIndex(index int) string {
+	index %= clipRingSize
+	return clipRing[index]
 }
