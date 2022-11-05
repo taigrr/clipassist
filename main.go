@@ -56,5 +56,5 @@ func ConvertDate(in string) {
 	}
 	t := time.UnixMilli(int64(ts))
 	beeep.Alert("Millis Converted", t.String(), "")
-	clipboard.Write(clipboard.FmtText, []byte(t.String()))
+	// clipboard.Write(clipboard.FmtText, []byte(t.String()))
 }
