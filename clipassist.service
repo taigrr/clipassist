@@ -4,7 +4,7 @@ Documentation=github.com/taigrr/clipassist
 StartLimitIntervalSec=60
 
 [Service]
-ExecStart=/home/tai/go/bin/clipassist
+ExecStart=/home/taigrr/go/bin/clipassist
 Restart=on-failure
 RestartSec=1
 
