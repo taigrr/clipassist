@@ -12,7 +12,11 @@ import (
 func Matchers() []matchers.Matcher {
 	var m []matchers.Matcher
 	millis := regexp.MustCompile(`\d\d\d\d\d\d\d\d\d\d\d\d\d`)
-	m = append(m, matchers.Matcher{Regex: millis, F: ConvertDate})
+	m = append(m, matchers.Matcher{
+		F:     ConvertDate,
+		ID:    "millis",
+		Regex: millis,
+	})
 	return m
 }
 

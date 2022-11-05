@@ -5,10 +5,17 @@ import (
 	"sync"
 )
 
+// A matcher is a regular expression tied to a function
+// if the regular expression matches exactly to the input text,
+// the function is called with the input.
+// If the regular expression does not match, but the FullText boolean
+// is not set to true, substrings will then be matched against the regexp.
+// For each submatch, the function F is called.
 type Matcher struct {
-	Regex *regexp.Regexp
-	F     func(string)
-	ID    string
+	Regex    *regexp.Regexp
+	FullText bool
+	F        func(string)
+	ID       string
 }
 
 var (
@@ -41,8 +48,15 @@ func Remove(id string) {
 func Run(in string) {
 	matchLock.Lock()
 	for _, matcher := range matchers {
-		if matcher.Regex.MatchString(in) {
-			matcher.F(in)
+
+		matches := matcher.Regex.FindAllString(in, -1)
+		for _, m := range matches {
+			if matcher.FullText {
+				if m != in {
+					break
+				}
+			}
+			matcher.F(m)
 		}
 	}
 	matchLock.Unlock()
