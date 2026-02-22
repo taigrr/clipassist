@@ -47,17 +47,20 @@ func Remove(id string) {
 
 func Run(in string) {
 	matchLock.Lock()
-	for _, matcher := range matchers {
+	snapshot := make([]Matcher, len(matchers))
+	copy(snapshot, matchers)
+	matchLock.Unlock()
 
+	for _, matcher := range snapshot {
+		if matcher.FullText {
+			if matcher.Regex.MatchString(in) && matcher.Regex.FindString(in) == in {
+				matcher.F(in)
+			}
+			continue
+		}
 		matches := matcher.Regex.FindAllString(in, -1)
 		for _, m := range matches {
-			if matcher.FullText {
-				if m != in {
-					break
-				}
-			}
 			matcher.F(m)
 		}
 	}
-	matchLock.Unlock()
 }

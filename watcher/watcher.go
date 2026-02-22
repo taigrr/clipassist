@@ -24,13 +24,13 @@ func Watch(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	watch := clipboard.Watch(context.Background(), clipboard.FmtText)
+	watch := clipboard.Watch(ctx, clipboard.FmtText)
 	for {
 		select {
 		case clip := <-watch:
 			sclip := string(clip)
 			current++
-			current %= 50
+			current %= clipRingSize
 			clipRing[current] = sclip
 			go matchers.Run(sclip)
 		case <-ctx.Done():
