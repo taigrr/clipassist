@@ -23,8 +23,8 @@ func TestHexColorRegex(t *testing.T) {
 		{"#FF5733", true},
 		{"#000000", true},
 		{"ff5733", false},
-		{"#fff", false},      // 3-digit shorthand — not matched
-		{"#ff57334", false},   // 7 hex digits — \b prevents match
+		{"#fff", false},     // 3-digit shorthand — not matched
+		{"#ff57334", false}, // 7 hex digits — \b prevents match
 		{"text #aabbcc!", true},
 	}
 	for _, tt := range tests {

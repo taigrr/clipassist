@@ -20,8 +20,8 @@ func TestSecondsRegex(t *testing.T) {
 		match bool
 	}{
 		{"1672531200", true},
-		{"123456789", false},   // 9 digits
-		{"12345678901", true},  // contains 10-digit substring
+		{"123456789", false},  // 9 digits
+		{"12345678901", true}, // contains 10-digit substring
 		{"abcdef", false},
 	}
 	for _, tt := range tests {
