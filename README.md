@@ -17,6 +17,9 @@ called against that piece of text.
 | **seconds** | 10-digit Unix second timestamps | Shows human-readable date/time |
 | **uuid** | UUIDs (v1–v7) | Shows UUID version info |
 | **hexcolor** | CSS hex colors (`#rrggbb`) | Shows RGB breakdown |
+| **jwt** | JSON Web Tokens | Shows header info, subject, issuer, expiry |
+| **ipaddr** | IPv4 & IPv6 addresses | Shows address type (private/public/loopback) |
+| **base64** | Base64-encoded strings | Decodes and shows preview of content |
 
 ## Writing Your Own Module
 
