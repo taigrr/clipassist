@@ -11,7 +11,7 @@ import (
 	"github.com/taigrr/clipassist/matchers"
 )
 
-var millisRegex = regexp.MustCompile(`\d{13}`)
+var millisRegex = regexp.MustCompile(`\b\d{13}\b`)
 
 // Matchers returns a Matcher for 13-digit Unix millisecond timestamps.
 func Matchers() []matchers.Matcher {

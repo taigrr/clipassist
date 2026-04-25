@@ -27,8 +27,10 @@ func TestMatchersRegexMatches13Digits(t *testing.T) {
 	}{
 		{"1234567890123", true},
 		{"0000000000000", true},
-		{"123456789012", false},  // 12 digits
-		{"12345678901234", true}, // 14 digits — contains a 13-digit substring
+		{"123456789012", false},
+		{"12345678901234", false},
+		{"ts=1234567890123", true},
+		{"1234567890123ms", false},
 		{"abcdef", false},
 	}
 
