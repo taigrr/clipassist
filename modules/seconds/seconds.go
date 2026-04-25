@@ -11,7 +11,7 @@ import (
 	"github.com/taigrr/clipassist/matchers"
 )
 
-var secondsRegex = regexp.MustCompile(`\d{10}`)
+var secondsRegex = regexp.MustCompile(`\b\d{10}\b`)
 
 // Matchers returns a Matcher for 10-digit Unix timestamps.
 func Matchers() []matchers.Matcher {
