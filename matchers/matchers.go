@@ -24,25 +24,32 @@ var (
 )
 
 func Get() []Matcher {
-	return matchers
+	matchLock.Lock()
+	defer matchLock.Unlock()
+
+	snapshot := make([]Matcher, len(matchers))
+	copy(snapshot, matchers)
+	return snapshot
 }
 
 func Add(a ...Matcher) {
 	matchLock.Lock()
+	defer matchLock.Unlock()
+
 	matchers = append(matchers, a...)
-	matchLock.Unlock()
 }
 
 func Remove(id string) {
-	toKeep := []Matcher{}
 	matchLock.Lock()
-	for _, m := range matchers {
-		if m.ID != id {
-			toKeep = append(toKeep, m)
+	defer matchLock.Unlock()
+
+	toKeep := make([]Matcher, 0, len(matchers))
+	for _, matcher := range matchers {
+		if matcher.ID != id {
+			toKeep = append(toKeep, matcher)
 		}
 	}
 	matchers = toKeep
-	matchLock.Unlock()
 }
 
 func Run(in string) {
