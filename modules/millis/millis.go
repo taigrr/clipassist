@@ -35,5 +35,5 @@ func ConvertDate(in string) {
 		return
 	}
 	t := time.UnixMilli(ts)
-	beeep.Alert("Millis Converted", t.String(), "")
+	_ = beeep.Alert("Millis Converted", t.String(), "")
 }

@@ -89,5 +89,5 @@ func Notify(in string) {
 		preview = preview[:maxPreviewLength] + "..."
 	}
 
-	beeep.Alert("Base64 Decoded", fmt.Sprintf("(%d bytes)\n%s", len(decoded), preview), "")
+	_ = beeep.Alert("Base64 Decoded", fmt.Sprintf("(%d bytes)\n%s", len(decoded), preview), "")
 }

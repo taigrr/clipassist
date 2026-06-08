@@ -144,5 +144,5 @@ func Notify(in string) {
 	}
 	msg += fmt.Sprintf("\nOKLCH(%.3f, %.3f, %.0f°)", l, c, h)
 
-	beeep.Alert("Hex Color", msg, "")
+	_ = beeep.Alert("Hex Color", msg, "")
 }
