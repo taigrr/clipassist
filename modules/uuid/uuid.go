@@ -46,5 +46,5 @@ func Notify(in string) {
 			version = "v7 (time-ordered)"
 		}
 	}
-	beeep.Alert("UUID Detected", fmt.Sprintf("%s\nVersion: %s", in, version), "")
+	_ = beeep.Alert("UUID Detected", fmt.Sprintf("%s\nVersion: %s", in, version), "")
 }

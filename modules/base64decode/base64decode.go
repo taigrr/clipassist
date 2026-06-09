@@ -12,9 +12,9 @@ import (
 	"github.com/taigrr/clipassist/matchers"
 )
 
-// Match strings that look like base64: at least 16 chars, only base64 alphabet,
-// proper padding, and must contain mixed case or digits (to reduce false positives).
-var base64Regex = regexp.MustCompile(`[A-Za-z0-9+/]{12,}=*`)
+// Match strings that look like base64: base64 alphabet with optional padding.
+// Heuristics that reduce false positives are applied separately in IsCandidate.
+var base64Regex = regexp.MustCompile(`^[A-Za-z0-9+/]+={0,2}$`)
 
 const maxPreviewLength = 200
 
@@ -30,9 +30,39 @@ func Matchers() []matchers.Matcher {
 	}
 }
 
+// IsCandidate reports whether a string is plausibly base64 text rather than an
+// arbitrary alphanumeric token.
+func IsCandidate(in string) bool {
+	if len(in) < 16 {
+		return false
+	}
+	if !base64Regex.MatchString(in) {
+		return false
+	}
+
+	hasUpper := false
+	hasLower := false
+	hasDigit := false
+	for _, r := range in {
+		switch {
+		case r >= 'A' && r <= 'Z':
+			hasUpper = true
+		case r >= 'a' && r <= 'z':
+			hasLower = true
+		case r >= '0' && r <= '9':
+			hasDigit = true
+		}
+	}
+
+	return (hasUpper && hasLower) || hasDigit
+}
+
 // Decode attempts to decode a base64 string. Returns the decoded string and
 // true if the result is valid UTF-8 text.
 func Decode(in string) (string, bool) {
+	if !IsCandidate(in) {
+		return "", false
+	}
 	data, err := base64.StdEncoding.DecodeString(in)
 	if err != nil {
 		// Try without padding
@@ -59,5 +89,5 @@ func Notify(in string) {
 		preview = preview[:maxPreviewLength] + "..."
 	}
 
-	beeep.Alert("Base64 Decoded", fmt.Sprintf("(%d bytes)\n%s", len(decoded), preview), "")
+	_ = beeep.Alert("Base64 Decoded", fmt.Sprintf("(%d bytes)\n%s", len(decoded), preview), "")
 }

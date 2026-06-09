@@ -82,5 +82,5 @@ func Notify(in string) {
 		}
 	}
 
-	beeep.Alert("JWT Token", msg, "")
+	_ = beeep.Alert("JWT Token", msg, "")
 }

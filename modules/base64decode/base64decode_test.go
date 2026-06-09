@@ -12,7 +12,9 @@ func TestDecode(t *testing.T) {
 	}{
 		{"SGVsbG8gV29ybGQh", "Hello World!", true},
 		{"dGVzdGluZyAxMjM=", "testing 123", true},
+		{"QUJDREVGR0hJSktMTQ==", "ABCDEFGHIJKLM", true},
 		{"not-base64!!!", "", false},
+		{"abcdefghijklmnop", "", false},
 	}
 	for _, tt := range tests {
 		got, ok := Decode(tt.input)
@@ -25,15 +27,37 @@ func TestDecode(t *testing.T) {
 	}
 }
 
+func TestIsCandidate(t *testing.T) {
+	tests := []struct {
+		input string
+		want  bool
+	}{
+		{"SGVsbG8gV29ybGQh", true},
+		{"dGVzdGluZyAxMjM=", true},
+		{"QUJDREVGR0hJSktMTQ==", true},
+		{"short", false},
+		{"hello world", false},
+		{"abcdefghijklmnop", false},
+		{"ABCDEFGHIJKLMNOP", false},
+	}
+	for _, tt := range tests {
+		got := IsCandidate(tt.input)
+		if got != tt.want {
+			t.Errorf("IsCandidate(%q) = %v, want %v", tt.input, got, tt.want)
+		}
+	}
+}
+
 func TestBase64Regex(t *testing.T) {
 	tests := []struct {
 		input string
 		match bool
 	}{
-		{"SGVsbG8gV29ybGQh", true}, // "Hello World!"
-		{"dGVzdGluZyAxMjM=", true}, // "testing 123"
-		{"short", false},           // too short
-		{"hello world", false},     // spaces
+		{"SGVsbG8gV29ybGQh", true},
+		{"dGVzdGluZyAxMjM=", true},
+		{"QUJDREVGR0hJSktMTQ==", true},
+		{"hello world", false},
+		{"not-base64!!!", false},
 	}
 	for _, tt := range tests {
 		got := base64Regex.MatchString(tt.input)

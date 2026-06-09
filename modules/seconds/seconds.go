@@ -35,5 +35,5 @@ func ConvertDate(in string) {
 		return
 	}
 	t := time.Unix(ts, 0)
-	beeep.Alert("Unix Seconds Converted", t.String(), "")
+	_ = beeep.Alert("Unix Seconds Converted", t.String(), "")
 }
