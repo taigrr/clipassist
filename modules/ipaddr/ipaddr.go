@@ -63,5 +63,5 @@ func Notify(in string) {
 	if info == "" {
 		return
 	}
-	beeep.Alert("IP Address", fmt.Sprintf("%s\n%s", in, info), "")
+	_ = beeep.Alert("IP Address", fmt.Sprintf("%s\n%s", in, info), "")
 }
