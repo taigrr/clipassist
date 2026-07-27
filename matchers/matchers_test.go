@@ -51,6 +51,26 @@ func TestRemoveNonExistent(t *testing.T) {
 	}
 }
 
+func TestGetReturnsSnapshot(t *testing.T) {
+	resetMatchers()
+	Add(Matcher{Regex: regexp.MustCompile(`a`), ID: "a", F: func(string) {}})
+
+	snapshot := Get()
+	snapshot[0].ID = "changed"
+	mutated := append(snapshot, Matcher{Regex: regexp.MustCompile(`b`), ID: "b", F: func(string) {}})
+	if len(mutated) != 2 {
+		t.Fatalf("expected mutated snapshot length 2, got %d", len(mutated))
+	}
+
+	got := Get()
+	if len(got) != 1 {
+		t.Fatalf("expected internal matcher list to stay length 1, got %d", len(got))
+	}
+	if got[0].ID != "a" {
+		t.Fatalf("expected internal matcher ID to remain %q, got %q", "a", got[0].ID)
+	}
+}
+
 func TestRunSubstringMatch(t *testing.T) {
 	resetMatchers()
 	var results []string

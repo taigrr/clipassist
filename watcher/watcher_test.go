@@ -1,8 +1,19 @@
 package watcher
 
 import (
+	"sync"
 	"testing"
 )
+
+func resetClipRing() {
+	clipLock.Lock()
+	defer clipLock.Unlock()
+
+	for i := range clipRing {
+		clipRing[i] = ""
+	}
+	current = 0
+}
 
 func TestClipRingInit(t *testing.T) {
 	if len(clipRing) != clipRingSize {
@@ -11,11 +22,7 @@ func TestClipRingInit(t *testing.T) {
 }
 
 func TestGetClipAtIndex_Empty(t *testing.T) {
-	// Reset ring for test isolation
-	for i := range clipRing {
-		clipRing[i] = ""
-	}
-	current = 0
+	resetClipRing()
 
 	got := GetClipAtIndex(0)
 	if got != "" {
@@ -24,31 +31,31 @@ func TestGetClipAtIndex_Empty(t *testing.T) {
 }
 
 func TestGetClipAtIndex_Wraps(t *testing.T) {
-	for i := range clipRing {
-		clipRing[i] = ""
-	}
-	clipRing[0] = "wrapped"
+	resetClipRing()
+	storeClip("wrapped")
 
-	// clipRingSize should wrap to 0
-	got := GetClipAtIndex(clipRingSize)
+	got := GetClipAtIndex(clipRingSize + 1)
 	if got != "wrapped" {
 		t.Errorf("expected %q at wrapped index, got %q", "wrapped", got)
 	}
 }
 
-func TestClipRingStorage(t *testing.T) {
-	// Reset ring
-	for i := range clipRing {
-		clipRing[i] = ""
-	}
-	current = 0
+func TestGetClipAtIndex_NegativeWraps(t *testing.T) {
+	resetClipRing()
+	storeClip("wrapped")
 
-	// Simulate clipboard entries being added (mimicking Watch loop logic)
+	got := GetClipAtIndex(-49)
+	if got != "wrapped" {
+		t.Errorf("expected %q at negative wrapped index, got %q", "wrapped", got)
+	}
+}
+
+func TestClipRingStorage(t *testing.T) {
+	resetClipRing()
+
 	entries := []string{"first", "second", "third"}
 	for _, entry := range entries {
-		current++
-		current %= clipRingSize
-		clipRing[current] = entry
+		storeClip(entry)
 	}
 
 	if GetClipAtIndex(1) != "first" {
@@ -63,24 +70,18 @@ func TestClipRingStorage(t *testing.T) {
 }
 
 func TestClipRingOverflow(t *testing.T) {
-	// Reset ring
-	for i := range clipRing {
-		clipRing[i] = ""
-	}
-	current = 0
+	resetClipRing()
 
-	// Fill the ring past capacity
 	for i := range clipRingSize + 5 {
-		current++
-		current %= clipRingSize
-		clipRing[current] = string(rune('A' + i%26))
+		storeClip(string(rune('A' + i%26)))
 	}
 
-	// Verify ring wrapped — index 1 should have been overwritten
-	// After 55 entries: current = 55 % 50 = 5
-	// Entries 51-55 wrote to indices 1-5
-	if current != 5 {
-		t.Errorf("expected current to be 5 after overflow, got %d", current)
+	clipLock.RLock()
+	gotCurrent := current
+	clipLock.RUnlock()
+
+	if gotCurrent != 5 {
+		t.Errorf("expected current to be 5 after overflow, got %d", gotCurrent)
 	}
 
 	// Index 1 should have the 51st entry (index 50 in 0-based, 50%26 = 24 = 'Y')
@@ -89,6 +90,24 @@ func TestClipRingOverflow(t *testing.T) {
 	if got != expected {
 		t.Errorf("expected %q at index 1 after overflow, got %q", expected, got)
 	}
+}
+
+func TestConcurrentStoreAndGet(t *testing.T) {
+	resetClipRing()
+
+	var waitGroup sync.WaitGroup
+	for i := range 100 {
+		waitGroup.Add(2)
+		go func(value int) {
+			defer waitGroup.Done()
+			storeClip(string(rune('A' + value%26)))
+		}(i)
+		go func(index int) {
+			defer waitGroup.Done()
+			_ = GetClipAtIndex(index)
+		}(i)
+	}
+	waitGroup.Wait()
 }
 
 func TestClipRingSize(t *testing.T) {

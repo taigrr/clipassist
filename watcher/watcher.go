@@ -3,6 +3,7 @@ package watcher
 import (
 	"context"
 	"errors"
+	"sync"
 
 	"github.com/taigrr/clipassist/matchers"
 	"golang.design/x/clipboard"
@@ -11,6 +12,7 @@ import (
 var (
 	clipRing []string
 	current  int
+	clipLock sync.RWMutex
 )
 
 const clipRingSize = 50
@@ -29,9 +31,7 @@ func Watch(ctx context.Context) {
 		select {
 		case clip := <-watch:
 			sclip := string(clip)
-			current++
-			current %= clipRingSize
-			clipRing[current] = sclip
+			storeClip(sclip)
 			go matchers.Run(sclip)
 		case <-ctx.Done():
 			return
@@ -48,6 +48,26 @@ func WriteToClip(text string) error {
 }
 
 func GetClipAtIndex(index int) string {
-	index %= clipRingSize
+	clipLock.RLock()
+	defer clipLock.RUnlock()
+
+	index = normalizeClipIndex(index)
 	return clipRing[index]
+}
+
+func storeClip(text string) {
+	clipLock.Lock()
+	defer clipLock.Unlock()
+
+	current++
+	current %= clipRingSize
+	clipRing[current] = text
+}
+
+func normalizeClipIndex(index int) int {
+	index %= clipRingSize
+	if index < 0 {
+		index += clipRingSize
+	}
+	return index
 }
