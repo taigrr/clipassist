@@ -1,2 +1,3 @@
-clipassist
+/clipassist
 *.exe
+dist/
