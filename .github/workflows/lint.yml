@@ -21,6 +21,20 @@ jobs:
       - name: Install clipboard dependencies
         run: sudo apt-get update && sudo apt-get install -y libx11-dev
 
+      - name: gofmt
+        run: |
+          fmtout="$(gofmt -l .)"
+          if [ -n "$fmtout" ]; then
+            echo "The following files are not gofmt-formatted:"
+            echo "$fmtout"
+            exit 1
+          fi
+
+      - name: go mod tidy check
+        run: |
+          go mod tidy
+          git diff --exit-code go.mod go.sum
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:

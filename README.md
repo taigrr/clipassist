@@ -1,5 +1,10 @@
 # ClipAssist
 
+[![Test](https://github.com/taigrr/clipassist/actions/workflows/test.yml/badge.svg)](https://github.com/taigrr/clipassist/actions/workflows/test.yml)
+[![Lint](https://github.com/taigrr/clipassist/actions/workflows/lint.yml/badge.svg)](https://github.com/taigrr/clipassist/actions/workflows/lint.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/taigrr/clipassist.svg)](https://pkg.go.dev/github.com/taigrr/clipassist)
+[![License: 0BSD](https://img.shields.io/badge/License-0BSD-blue.svg)](./LICENSE)
+
 > **Note:** this project integrates with the system clipboard and the
 > notifications system of your device, and as a result, requires CGO.
 
@@ -65,3 +70,8 @@ go install github.com/taigrr/clipassist/cmd/clipassist@latest
 A sample systemd unit file to be placed into
 `/etc/systemd/user/clipassist.service` is provided. Be sure to change the path
 to the binary to match your home folder.
+
+## License
+
+Released under the [0BSD](./LICENSE) license.
+
