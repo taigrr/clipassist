@@ -86,7 +86,11 @@ func Notify(in string) {
 
 	preview := decoded
 	if len(preview) > maxPreviewLength {
-		preview = preview[:maxPreviewLength] + "..."
+		cut := maxPreviewLength
+		for cut > 0 && !utf8.RuneStart(preview[cut]) {
+			cut--
+		}
+		preview = preview[:cut] + "..."
 	}
 
 	_ = beeep.Alert("Base64 Decoded", fmt.Sprintf("(%d bytes)\n%s", len(decoded), preview), "")
