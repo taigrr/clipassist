@@ -2,7 +2,6 @@ package watcher
 
 import (
 	"context"
-	"errors"
 	"sync"
 
 	"github.com/taigrr/clipassist/matchers"
@@ -30,7 +29,7 @@ func Watch(ctx context.Context) {
 	for {
 		select {
 		case clip := <-watch:
-			sclip := string(clip)
+			sclip := string(clip.Bytes)
 			storeClip(sclip)
 			go matchers.Run(sclip)
 		case <-ctx.Done():
@@ -40,10 +39,7 @@ func Watch(ctx context.Context) {
 }
 
 func WriteToClip(text string) error {
-	success := clipboard.Write(clipboard.FmtText, []byte(text))
-	if success == nil {
-		return errors.New("could not write to clipboard")
-	}
+	clipboard.Write(clipboard.FmtText, []byte(text))
 	return nil
 }
 

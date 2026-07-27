@@ -26,11 +26,11 @@ func TestHexColorRegex(t *testing.T) {
 		{"ff5733", false},
 		{"#fff", true},      // 3-digit shorthand — now matched
 		{"#abc", true},      // 3-digit shorthand
-		{"#ff57334", false},  // 7 hex digits — \b prevents match
+		{"#ff57334", false}, // 7 hex digits — \b prevents match
 		{"text #aabbcc!", true},
-		{"#ff5733cc", true},  // 8-digit with alpha
-		{"#FF5733CC", true},  // 8-digit uppercase
-		{"#00000000", true},  // fully transparent black
+		{"#ff5733cc", true}, // 8-digit with alpha
+		{"#FF5733CC", true}, // 8-digit uppercase
+		{"#00000000", true}, // fully transparent black
 	}
 	for _, tt := range tests {
 		got := hexColorRegex.FindString(tt.input)
