@@ -12,11 +12,18 @@ import (
 	"github.com/taigrr/clipassist/matchers"
 )
 
-// Match strings that look like base64: base64 alphabet with optional padding.
+// Match strings that look like base64: base64 or base64url alphabet with optional padding.
 // Heuristics that reduce false positives are applied separately in IsCandidate.
-var base64Regex = regexp.MustCompile(`^[A-Za-z0-9+/]+={0,2}$`)
+var base64Regex = regexp.MustCompile(`^[A-Za-z0-9+/_-]+={0,2}$`)
 
 const maxPreviewLength = 200
+
+var decoders = []*base64.Encoding{
+	base64.StdEncoding,
+	base64.RawStdEncoding,
+	base64.URLEncoding,
+	base64.RawURLEncoding,
+}
 
 // Matchers returns a Matcher for base64-encoded strings.
 func Matchers() []matchers.Matcher {
@@ -63,13 +70,16 @@ func Decode(in string) (string, bool) {
 	if !IsCandidate(in) {
 		return "", false
 	}
-	data, err := base64.StdEncoding.DecodeString(in)
-	if err != nil {
-		// Try without padding
-		data, err = base64.RawStdEncoding.DecodeString(in)
-		if err != nil {
-			return "", false
+	var data []byte
+	for _, decoder := range decoders {
+		decoded, err := decoder.DecodeString(in)
+		if err == nil {
+			data = decoded
+			break
 		}
+	}
+	if data == nil {
+		return "", false
 	}
 	if !utf8.Valid(data) {
 		return "", false

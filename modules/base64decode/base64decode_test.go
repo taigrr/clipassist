@@ -13,6 +13,8 @@ func TestDecode(t *testing.T) {
 		{"SGVsbG8gV29ybGQh", "Hello World!", true},
 		{"dGVzdGluZyAxMjM=", "testing 123", true},
 		{"QUJDREVGR0hJSktMTQ==", "ABCDEFGHIJKLM", true},
+		{"aGVsbG8td29ybGQ_", "hello-world?", true},
+		{"dXJsLXNhZmV-fn5-", "url-safe~~~~", true},
 		{"not-base64!!!", "", false},
 		{"abcdefghijklmnop", "", false},
 	}
@@ -35,6 +37,8 @@ func TestIsCandidate(t *testing.T) {
 		{"SGVsbG8gV29ybGQh", true},
 		{"dGVzdGluZyAxMjM=", true},
 		{"QUJDREVGR0hJSktMTQ==", true},
+		{"aGVsbG8td29ybGQ_", true},
+		{"dXJsLXNhZmV-fn5-", true},
 		{"short", false},
 		{"hello world", false},
 		{"abcdefghijklmnop", false},
@@ -56,6 +60,8 @@ func TestBase64Regex(t *testing.T) {
 		{"SGVsbG8gV29ybGQh", true},
 		{"dGVzdGluZyAxMjM=", true},
 		{"QUJDREVGR0hJSktMTQ==", true},
+		{"aGVsbG8td29ybGQ_", true},
+		{"dXJsLXNhZmV-fn5-", true},
 		{"hello world", false},
 		{"not-base64!!!", false},
 	}
