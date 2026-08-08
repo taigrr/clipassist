@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"regexp"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/gen2brain/beeep"
@@ -65,26 +66,47 @@ func IsCandidate(in string) bool {
 }
 
 // Decode attempts to decode a base64 string. Returns the decoded string and
-// true if the result is valid UTF-8 text.
+// true if the result is valid UTF-8 that looks like text (printable characters
+// or whitespace, per isText). Requiring the decoded bytes to look like text
+// rather than merely valid UTF-8 avoids firing on url-safe-alphabet inputs that
+// aren't really base64, such as UUIDs and other hyphenated identifiers, which
+// otherwise decode to binary garbage.
 func Decode(in string) (string, bool) {
 	if !IsCandidate(in) {
 		return "", false
 	}
-	var data []byte
+	var (
+		data []byte
+		ok   bool
+	)
 	for _, decoder := range decoders {
 		decoded, err := decoder.DecodeString(in)
 		if err == nil {
 			data = decoded
+			ok = true
 			break
 		}
 	}
-	if data == nil {
+	if !ok {
 		return "", false
 	}
-	if !utf8.Valid(data) {
+	if !utf8.Valid(data) || !isText(data) {
 		return "", false
 	}
 	return string(data), true
+}
+
+// isText reports whether data consists entirely of printable characters
+// (per unicode.IsPrint) or whitespace (per unicode.IsSpace, which covers tabs,
+// newlines, and Unicode spaces such as NBSP), i.e. it plausibly represents
+// human-readable text rather than decoded binary content.
+func isText(data []byte) bool {
+	for _, r := range string(data) {
+		if !unicode.IsPrint(r) && !unicode.IsSpace(r) {
+			return false
+		}
+	}
+	return true
 }
 
 // Notify decodes a base64 string and sends a notification with a preview.

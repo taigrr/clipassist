@@ -17,6 +17,20 @@ func TestDecode(t *testing.T) {
 		{"dXJsLXNhZmV-fn5-", "url-safe~~~~", true},
 		{"not-base64!!!", "", false},
 		{"abcdefghijklmnop", "", false},
+		// A UUID matches the url-safe alphabet and length but decodes to
+		// binary garbage, so it must be rejected rather than firing a
+		// spurious notification.
+		{"550e8400-e29b-41d4-a716-446655440000", "", false},
+		// Mixed std (+) and url-safe (_) alphabets can't decode under any
+		// single encoding.
+		{"abc+def_ghij1234", "", false},
+		// Decodes to valid UTF-8 containing a control character (ESC), so
+		// it must be rejected by the text guard even though utf8.Valid is
+		// true. This directly exercises the isText branch.
+		{"YWJjG2RlZmdoaWpr", "", false},
+		// Decodes to text containing a non-breaking space (U+00A0), which
+		// is accepted because it is Unicode whitespace.
+		{"aGVsbG/CoHdvcmxkIQ==", "hello\u00a0world!", true},
 	}
 	for _, tt := range tests {
 		got, ok := Decode(tt.input)
