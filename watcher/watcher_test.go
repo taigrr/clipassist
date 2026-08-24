@@ -1,8 +1,12 @@
 package watcher
 
 import (
+	"context"
 	"sync"
 	"testing"
+	"time"
+
+	"golang.design/x/clipboard"
 )
 
 func resetClipRing() {
@@ -108,6 +112,23 @@ func TestConcurrentStoreAndGet(t *testing.T) {
 		}(i)
 	}
 	waitGroup.Wait()
+}
+
+func TestRunClipboardWatchReturnsWhenWatchCloses(t *testing.T) {
+	watch := make(chan clipboard.Data)
+	close(watch)
+
+	done := make(chan struct{})
+	go func() {
+		runClipboardWatch(context.Background(), watch)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("expected runClipboardWatch to return when watch channel closes")
+	}
 }
 
 func TestClipRingSize(t *testing.T) {

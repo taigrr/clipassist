@@ -62,8 +62,7 @@ func newRootCmd() *cobra.Command {
 			)
 			defer stop()
 
-			watcher.Watch(ctx)
-			return nil
+			return watcher.Watch(ctx)
 		},
 	}
 }
