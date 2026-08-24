@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/taigrr/clipassist/matchers"
@@ -20,15 +21,23 @@ func init() {
 	clipRing = make([]string, clipRingSize)
 }
 
-func Watch(ctx context.Context) {
+func Watch(ctx context.Context) error {
 	err := clipboard.Init()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("initialize clipboard: %w", err)
 	}
 	watch := clipboard.Watch(ctx, clipboard.FmtText)
+	runClipboardWatch(ctx, watch)
+	return nil
+}
+
+func runClipboardWatch(ctx context.Context, watch <-chan clipboard.Data) {
 	for {
 		select {
-		case clip := <-watch:
+		case clip, ok := <-watch:
+			if !ok {
+				return
+			}
 			sclip := string(clip.Bytes)
 			storeClip(sclip)
 			go matchers.Run(sclip)
