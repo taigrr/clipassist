@@ -1,8 +1,12 @@
 package watcher
 
 import (
+	"context"
+	"errors"
 	"sync"
 	"testing"
+
+	"golang.design/x/clipboard"
 )
 
 func resetClipRing() {
@@ -113,5 +117,33 @@ func TestConcurrentStoreAndGet(t *testing.T) {
 func TestClipRingSize(t *testing.T) {
 	if clipRingSize != 50 {
 		t.Errorf("expected clipRingSize to be 50, got %d", clipRingSize)
+	}
+}
+
+func TestWriteToClipReturnsClipboardError(t *testing.T) {
+	wantErr := errors.New("clipboard unavailable")
+
+	oldWriteClipboard := writeClipboard
+	writeClipboard = func(ctx context.Context, format clipboard.Format, data []byte, opts ...clipboard.Option) (<-chan struct{}, error) {
+		if ctx == nil {
+			t.Fatal("expected non-nil context")
+		}
+		if format != clipboard.FmtText {
+			t.Fatalf("expected FmtText, got %v", format)
+		}
+		if string(data) != "hello" {
+			t.Fatalf("expected clipboard text %q, got %q", "hello", string(data))
+		}
+		if len(opts) != 0 {
+			t.Fatalf("expected no clipboard options, got %d", len(opts))
+		}
+		return nil, wantErr
+	}
+	defer func() {
+		writeClipboard = oldWriteClipboard
+	}()
+
+	if err := WriteToClip("hello"); !errors.Is(err, wantErr) {
+		t.Fatalf("expected %v, got %v", wantErr, err)
 	}
 }
