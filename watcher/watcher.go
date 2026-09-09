@@ -13,6 +13,8 @@ var (
 	clipRing []string
 	current  int
 	clipLock sync.RWMutex
+
+	writeClipboard = clipboard.Write
 )
 
 const clipRingSize = 50
@@ -48,8 +50,8 @@ func runClipboardWatch(ctx context.Context, watch <-chan clipboard.Data) {
 }
 
 func WriteToClip(text string) error {
-	clipboard.Write(clipboard.FmtText, []byte(text))
-	return nil
+	_, err := writeClipboard(context.Background(), clipboard.FmtText, []byte(text))
+	return err
 }
 
 func GetClipAtIndex(index int) string {
