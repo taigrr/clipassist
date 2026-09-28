@@ -1,12 +1,12 @@
 module github.com/taigrr/clipassist
 
-go 1.26
+go 1.27
 
 require (
 	github.com/charmbracelet/fang v1.0.0
 	github.com/gen2brain/beeep v0.11.2
 	github.com/spf13/cobra v1.10.2
-	golang.design/x/clipboard v0.8.0
+	golang.design/x/clipboard v0.9.0
 )
 
 require (
