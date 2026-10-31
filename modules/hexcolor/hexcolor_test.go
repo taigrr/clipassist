@@ -74,7 +74,7 @@ func TestParseHex8Digit(t *testing.T) {
 }
 
 func TestParseHexInvalid(t *testing.T) {
-	tests := []string{"", "ff5733", "#gg5733", "#ff", "#f"}
+	tests := []string{"", "ff5733", "#gg5733", "#ff", "#f", "#gggg", "#123g", "#12345", "#1234z"}
 	for _, in := range tests {
 		_, _, _, _, ok := ParseHex(in)
 		if ok {
@@ -118,4 +118,26 @@ func TestNotifyDoesNotPanic(t *testing.T) {
 	Notify("#fff")
 	Notify("#ff573380")
 	Notify("invalid")
+}
+
+func TestParseHexShortAlpha(t *testing.T) {
+	for _, test := range []struct {
+		input string
+		want  [4]uint8
+	}{
+		{"#1234", [4]uint8{17, 34, 51, 68}},
+		{"#aBcD", [4]uint8{170, 187, 204, 221}},
+		{"#fff0", [4]uint8{255, 255, 255, 0}},
+		{"#000f", [4]uint8{0, 0, 0, 255}},
+	} {
+		t.Run(test.input, func(t *testing.T) {
+			red, green, blue, alpha, ok := ParseHex(test.input)
+			if got := [4]uint8{red, green, blue, alpha}; !ok || got != test.want {
+				t.Fatalf("ParseHex(%q) = %v, %v; want %v, true", test.input, got, ok, test.want)
+			}
+			if got := hexColorRegex.FindString("color: " + test.input + ";"); got != test.input {
+				t.Fatalf("matcher returned %q, want %q", got, test.input)
+			}
+		})
+	}
 }
