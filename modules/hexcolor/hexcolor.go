@@ -1,5 +1,5 @@
 // Package hexcolor provides a clipboard matcher that detects CSS hex color
-// codes (#rgb, #rrggbb, #rrggbbaa) and shows an informational notification
+// codes (#rgb, #rgba, #rrggbb, #rrggbbaa) and shows an informational notification
 // with the RGB(A) breakdown and OKLCH approximation.
 package hexcolor
 
@@ -13,10 +13,10 @@ import (
 	"github.com/taigrr/clipassist/matchers"
 )
 
-// hexColorRegex matches 3-digit (#rgb), 6-digit (#rrggbb), and 8-digit
-// (#rrggbbaa) CSS hex color codes. The negative lookahead-style \b prevents
+// hexColorRegex matches 3-digit (#rgb), 4-digit (#rgba), 6-digit (#rrggbb),
+// and 8-digit (#rrggbbaa) CSS hex color codes. The word boundary prevents
 // partial matches on longer hex strings.
-var hexColorRegex = regexp.MustCompile(`#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b`)
+var hexColorRegex = regexp.MustCompile(`#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b`)
 
 // Matchers returns a Matcher for hex color codes.
 func Matchers() []matchers.Matcher {
@@ -37,6 +37,13 @@ func ParseHex(in string) (r, g, b, a uint8, ok bool) {
 	}
 	hex := in[1:]
 	switch len(hex) {
+	case 4:
+		// Expand #rgba to #rrggbbaa and reuse the long-form parser.
+		expanded := []byte{'#'}
+		for _, digit := range []byte(hex) {
+			expanded = append(expanded, digit, digit)
+		}
+		return ParseHex(string(expanded))
 	case 3:
 		// #rgb → expand each digit: f → ff
 		rv, err := strconv.ParseUint(string([]byte{hex[0], hex[0]}), 16, 8)
