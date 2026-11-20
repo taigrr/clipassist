@@ -63,6 +63,8 @@ Set `FullText: true` on a matcher if you only want it to fire when the
 
 ## Installation
 
+Building from source requires Go 1.27.4 or newer and CGO.
+
 ```bash
 go install github.com/taigrr/clipassist/cmd/clipassist@latest
 ```
